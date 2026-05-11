@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Note: No URL here for Prisma 7 compatibility
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  EMPLOYEE
+  FINANCE
+  SUPPORT
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  users     User[]
+  assets    Asset[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  name           String?
+  role           UserRole     @default(EMPLOYEE)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  assignedAssets Asset[]
+}
+
+model Asset {
+  id             String       @id @default(cuid())
+  assetTag       String       @unique
+  name           String
+  category       String
+  status         String       @default("AVAILABLE")
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  assignedToId   String?
+  assignedTo     User?        @relation(fields: [assignedToId], references: [id])
+}
