@@ -1,27 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand Primary (Deep Blue) */
-  --color-primary: hsl(226 71% 40%);
-  --color-primary-foreground: hsl(210 40% 98%);
+  /* Brand Primary: Koocaa Deep Blue */
+  --color-primary: #1e40af;
+  --color-primary-foreground: #f8fafc;
   
-  /* Surface and Neutral Grays */
-  --color-background: hsl(210 40% 98.5%);
-  --color-foreground: hsl(222.2 84% 4.9%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222.2 84% 4.9%);
-  --color-muted: hsl(210 40% 96.1%);
-  --color-muted-foreground: hsl(215.4 16.3% 46.9%);
-  --color-border: hsl(214.3 31.8% 91.4%);
+  /* Background: Soft Google Slate */
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  
+  /* Card/Surface Colors */
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  
+  /* Borders and Grays */
+  --color-border: #e2e8f0;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
   
   /* Status Colors */
-  --color-success: hsl(142 70% 45%);
-  --color-warning: hsl(38 92% 50%);
-  --color-destructive: hsl(0 84% 60%);
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-destructive: #ef4444;
 
   --radius-lg: 0.75rem;
-  --radius-md: calc(0.75rem - 2px);
-  --radius-sm: calc(0.75rem - 4px);
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
 }
 
 @layer base {
@@ -31,8 +35,6 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    /* Essential for the "smooth" Google feel */
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 }

@@ -1,9 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Organization {
@@ -62,6 +64,6 @@ model MaintenanceLog {
   assetId   String
   asset     Asset    @relation(fields: [assetId], references: [id])
   issue     String
-  status    String    @default("IN_PROGRESS")
+  status    String   @default("IN_PROGRESS")
   createdAt DateTime @default(now())
 }
