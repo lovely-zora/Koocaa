@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+// 1. Load the Inter font for that clean, Google-style look
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Koocaa | Enterprise Asset Management",
-  description: "Manage your organization assets efficiently",
+  description: "Premium asset tracking for modern organizations",
 };
 
 export default function RootLayout({
@@ -16,7 +17,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900`}>
+      {/* 2. Every page content is injected inside this body */}
+      <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900 antialiased`}>
         {children}
       </body>
     </html>

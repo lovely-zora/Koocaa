@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Laptop, AlertTriangle, CheckCircle, Package, Activity } from "lucide-react";
+import { Laptop, CheckCircle, AlertTriangle, Activity, Package } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -9,97 +9,81 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.orgId) return null;
 
-  const orgId = session.user.orgId;
-
-  // 1. Fetch real metrics from your database [cite: 30, 410, 633]
-  const [totalAssets, availableAssets, maintenanceAssets, recentAssets] = await Promise.all([
-    prisma.asset.count({ where: { organizationId: orgId } }),
-    prisma.asset.count({ where: { organizationId: orgId, status: "AVAILABLE" } }),
-    prisma.asset.count({ where: { organizationId: orgId, status: "IN_REPAIR" } }),
+  const [total, available, repair, recent] = await Promise.all([
+    prisma.asset.count({ where: { organizationId: session.user.orgId } }),
+    prisma.asset.count({ where: { organizationId: session.user.orgId, status: "AVAILABLE" } }),
+    prisma.asset.count({ where: { organizationId: session.user.orgId, status: "IN_REPAIR" } }),
     prisma.asset.findMany({
-      where: { organizationId: orgId },
+      where: { organizationId: session.user.orgId },
       orderBy: { createdAt: "desc" },
-      take: 5,
-      include: { assignedTo: { select: { name: true } } }
+      take: 5
     })
   ]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* 2. Page Header [cite: 408] */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard Overview</h1>
-        <p className="text-sm text-slate-500 mt-1">Real-time metrics for your enterprise assets.</p>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
+        <p className="text-sm text-slate-500">Real-time enterprise metrics.</p>
       </div>
 
-      {/* 3. Metrics Grid [cite: 8, 409, 632] */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="shadow-sm border-slate-200">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="bg-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Assets</CardTitle>
-            <Package className="w-4 h-4 text-blue-600" />
+            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
+            <Package className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{totalAssets}</div>
+            <div className="text-2xl font-bold">{total}</div>
           </CardContent>
         </Card>
-
-        <Card className="shadow-sm border-slate-200">
+        <Card className="bg-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-slate-600">Available & Ready</CardTitle>
-            <CheckCircle className="w-4 h-4 text-emerald-500" />
+            <CardTitle className="text-sm font-medium">Available</CardTitle>
+            <CheckCircle className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{availableAssets}</div>
+            <div className="text-2xl font-bold">{available}</div>
           </CardContent>
         </Card>
-
-        <Card className="shadow-sm border-slate-200">
+        <Card className="bg-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-slate-600">In Maintenance</CardTitle>
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <CardTitle className="text-sm font-medium">In Repair</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{maintenanceAssets}</div>
+            <div className="text-2xl font-bold">{repair}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 4. Recent Activity [cite: 9, 632] */}
-      <div className="mt-8">
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-blue-800" />
-              <CardTitle className="text-lg text-slate-900">Recently Added Assets</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            {recentAssets.length === 0 ? (
-              <div className="p-10 text-center text-sm text-slate-500">No assets in the system yet.</div>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {recentAssets.map((asset) => (
-                  <div key={asset.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center gap-4 text-left">
-                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <Laptop className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">{asset.name}</p>
-                        <p className="text-xs text-slate-500 uppercase tracking-wider">{asset.assetTag}</p>
-                      </div>
-                    </div>
-                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700 uppercase">
-                      {asset.status}
-                    </span>
+      <Card className="bg-white">
+        <CardHeader className="border-b bg-slate-50/50 py-3">
+          <div className="flex items-center gap-2 font-semibold text-sm">
+            <Activity className="h-4 w-4 text-blue-800" /> Recent Activity
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {recent.length === 0 ? (
+            <div className="p-10 text-center text-sm text-slate-500">No assets found.</div>
+          ) : (
+            recent.map((asset) => (
+              <div key={asset.id} className="p-4 border-b last:border-0 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Laptop className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="font-medium text-sm">{asset.name}</p>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-tighter">{asset.assetTag}</p>
                   </div>
-                ))}
+                </div>
+                <div className="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 uppercase">
+                  {asset.status}
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
