@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Laptop, CheckCircle, AlertTriangle, Activity, Package } from "lucide-react";
+import { Laptop, CheckCircle, AlertTriangle, Package, Activity } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +9,7 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.orgId) return null;
 
+  // Fetch metrics in parallel for maximum speed
   const [total, available, repair, recent] = await Promise.all([
     prisma.asset.count({ where: { organizationId: session.user.orgId } }),
     prisma.asset.count({ where: { organizationId: session.user.orgId, status: "AVAILABLE" } }),
@@ -21,45 +22,41 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
-        <p className="text-sm text-slate-500">Real-time enterprise metrics.</p>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard Overview</h1>
+        <p className="text-sm text-slate-500 mt-1">Real-time metrics for your enterprise assets.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
-            <Package className="h-4 w-4 text-blue-600" />
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-slate-600">Total Assets</CardTitle>
+            <Package className="w-4 h-4 text-blue-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{total}</div>
-          </CardContent>
+          <CardContent><div className="text-3xl font-bold text-slate-900">{total}</div></CardContent>
         </Card>
-        <Card className="bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Available</CardTitle>
-            <CheckCircle className="h-4 w-4 text-emerald-500" />
+        
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-slate-600">Available</CardTitle>
+            <CheckCircle className="w-4 h-4 text-emerald-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{available}</div>
-          </CardContent>
+          <CardContent><div className="text-3xl font-bold text-slate-900">{available}</div></CardContent>
         </Card>
-        <Card className="bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">In Repair</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+        
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-slate-600">In Maintenance</CardTitle>
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{repair}</div>
-          </CardContent>
+          <CardContent><div className="text-3xl font-bold text-slate-900">{repair}</div></CardContent>
         </Card>
       </div>
 
-      <Card className="bg-white">
+      <Card className="bg-white border-slate-200 shadow-sm">
         <CardHeader className="border-b bg-slate-50/50 py-3">
-          <div className="flex items-center gap-2 font-semibold text-sm">
+          <div className="flex items-center gap-2 font-semibold text-sm text-slate-800">
             <Activity className="h-4 w-4 text-blue-800" /> Recent Activity
           </div>
         </CardHeader>
@@ -67,20 +64,24 @@ export default async function DashboardPage() {
           {recent.length === 0 ? (
             <div className="p-10 text-center text-sm text-slate-500">No assets found.</div>
           ) : (
-            recent.map((asset) => (
-              <div key={asset.id} className="p-4 border-b last:border-0 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Laptop className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium text-sm">{asset.name}</p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-tighter">{asset.assetTag}</p>
+            <div className="divide-y divide-slate-100">
+              {recent.map((asset) => (
+                <div key={asset.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <Laptop className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-slate-900">{asset.name}</p>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-tighter">{asset.assetTag}</p>
+                    </div>
+                  </div>
+                  <div className="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 uppercase">
+                    {asset.status}
                   </div>
                 </div>
-                <div className="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 uppercase">
-                  {asset.status}
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

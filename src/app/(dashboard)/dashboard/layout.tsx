@@ -1,19 +1,15 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, Users, Package2 } from "lucide-react";
+import { LayoutDashboard, Package, Users, Package2, Search } from "lucide-react";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) redirect("/login");
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
-      {/* 1. Permanent Sidebar */}
+      {/* SIDEBAR - Defined ONLY here */}
       <aside className="hidden border-r bg-white md:block shadow-sm">
         <div className="flex h-full flex-col gap-2">
           <div className="flex h-14 items-center border-b px-6">
@@ -37,13 +33,18 @@ export default async function DashboardLayout({
 
       <div className="flex flex-col bg-slate-50">
         <header className="flex h-14 items-center gap-4 border-b bg-white px-6 shadow-sm">
-          <div className="flex-1 font-semibold text-slate-700">Koocaa Dashboard</div>
-          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700">
+          <div className="w-full flex-1">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input type="search" placeholder="Search..." className="w-full rounded-full bg-slate-50 pl-10 pr-4 py-1.5 text-sm border focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+          </div>
+          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 uppercase">
             {session.user?.name?.charAt(0) || "U"}
           </div>
         </header>
 
-        {/* 2. Changing Page Content */}
+        {/* CONTENT - Pages are injected here */}
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-6xl mx-auto">
             {children}

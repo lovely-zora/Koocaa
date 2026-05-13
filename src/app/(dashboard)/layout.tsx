@@ -1,121 +1,53 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { 
-  LayoutDashboard, 
-  Package, 
-  Users, 
-  Settings, 
-  Search, 
-  Bell, 
-  Menu, 
-  Package2 
-} from "lucide-react";
+import { LayoutDashboard, Package, Users, Package2, Search } from "lucide-react";
 
-export default async function DashboardLayout({ 
-  children 
-}: { 
-  children: React.ReactNode 
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) redirect("/login");
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]">
-      {/* 1. Left Sidebar */}
-      <div className="hidden border-r border-slate-200 bg-white md:block shadow-sm z-10">
-        <div className="flex h-full max-h-screen flex-col gap-2">
-          {/* Brand Logo */}
-          <div className="flex h-14 items-center border-b border-slate-100 px-4 lg:h-[60px] lg:px-6">
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-              <div className="bg-[#1E40AF] p-1.5 rounded-lg text-white">
-                <Package2 className="h-5 w-5" />
-              </div>
-              <span className="text-xl tracking-tight text-slate-900 font-bold">Koocaa</span>
+    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
+      {/* 1. PERMANENT SIDEBAR */}
+      <aside className="hidden border-r bg-white md:block shadow-sm">
+        <div className="flex h-full flex-col gap-2">
+          <div className="flex h-14 items-center border-b px-6">
+            <Link href="/dashboard" className="flex items-center gap-2 font-bold text-blue-800 text-xl">
+              <Package2 className="h-6 w-6" /> Koocaa
             </Link>
           </div>
-          
-          {/* Navigation Links */}
-          <div className="flex-1 overflow-auto py-4">
-            <nav className="grid items-start px-3 text-sm font-medium space-y-1">
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-3 rounded-md px-3 py-2.5 text-slate-600 transition-all hover:text-[#1E40AF] hover:bg-blue-50"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Overview
-              </Link>
-              <Link
-                href="/assets"
-                className="flex items-center gap-3 rounded-md px-3 py-2.5 text-slate-600 transition-all hover:text-[#1E40AF] hover:bg-blue-50"
-              >
-                <Package className="h-4 w-4" />
-                Asset Inventory
-              </Link>
-              <Link
-                href="/users"
-                className="flex items-center gap-3 rounded-md px-3 py-2.5 text-slate-600 transition-all hover:text-[#1E40AF] hover:bg-blue-50"
-              >
-                <Users className="h-4 w-4" />
-                Directory
-              </Link>
-              
-              <div className="my-4 border-t border-slate-100 mx-3"></div>
-              
-              <Link
-                href="#"
-                className="flex items-center gap-3 rounded-md px-3 py-2.5 text-slate-600 transition-all hover:text-[#1E40AF] hover:bg-blue-50"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
-            </nav>
-          </div>
+          <nav className="grid items-start px-4 text-sm font-medium pt-4 space-y-1">
+            <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">
+              <LayoutDashboard className="h-4 w-4" /> Overview
+            </Link>
+            <Link href="/assets" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">
+              <Package className="h-4 w-4" /> Assets
+            </Link>
+            <Link href="/users" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">
+              <Users className="h-4 w-4" /> Employees
+            </Link>
+          </nav>
         </div>
-      </div>
+      </aside>
 
-      {/* 2. Main Workspace */}
-      <div className="flex flex-col w-full overflow-hidden">
-        {/* Top Header */}
-        <header className="flex h-14 items-center gap-4 border-b border-slate-200 bg-white px-4 lg:h-[60px] lg:px-6 z-10 shadow-sm">
-          {/* Mobile Menu Toggle (Visible only on small screens) */}
-          <button className="shrink-0 md:hidden text-slate-500 hover:text-slate-900">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </button>
-          
-          {/* Global Search */}
+      <div className="flex flex-col bg-slate-50">
+        {/* 2. TOP HEADER */}
+        <header className="flex h-14 items-center gap-4 border-b bg-white px-6 shadow-sm">
           <div className="w-full flex-1">
-            <form>
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
-                  type="search"
-                  placeholder="Search assets, tags, or employees..."
-                  className="w-full rounded-full border border-slate-200 bg-slate-50 px-10 py-2 text-sm outline-none transition-colors focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF]"
-                />
-              </div>
-            </form>
-          </div>
-          
-          {/* Right side actions & Profile */}
-          <div className="flex items-center gap-4">
-            <button className="relative text-slate-500 hover:text-slate-900 transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-            </button>
-            
-            <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#1E40AF] to-blue-400 text-white flex items-center justify-center text-xs font-bold shadow-sm ring-2 ring-white cursor-pointer hover:opacity-90 transition-opacity">
-                {session.user?.name?.charAt(0) || 'A'}
-              </div>
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input type="search" placeholder="Search..." className="w-full rounded-full bg-slate-50 pl-10 pr-4 py-1.5 text-sm border focus:outline-none focus:ring-1 focus:ring-blue-500" />
             </div>
+          </div>
+          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 uppercase">
+            {session.user?.name?.charAt(0) || "U"}
           </div>
         </header>
 
-        {/* 3. Page Content Area (This is where your Dashboard, Assets, and Users pages render!) */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 p-4 lg:p-8">
-          <div className="mx-auto max-w-6xl">
+        {/* 3. DYNAMIC CONTENT AREA */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-6xl mx-auto">
             {children}
           </div>
         </main>
