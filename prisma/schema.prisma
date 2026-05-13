@@ -4,45 +4,64 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // Note: No URL here for Prisma 7 compatibility
-}
-
-enum UserRole {
-  SUPER_ADMIN
-  ADMIN
-  MANAGER
-  EMPLOYEE
-  FINANCE
-  SUPPORT
 }
 
 model Organization {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
-  createdAt DateTime @default(now())
+  currency  String   @default("USD")
   users     User[]
   assets    Asset[]
+  createdAt DateTime @default(now())
 }
 
 model User {
-  id             String       @id @default(cuid())
-  email          String       @unique
+  id             String         @id @default(cuid())
+  email          String         @unique
+  password       String?
   name           String?
-  role           UserRole     @default(EMPLOYEE)
+  role           String         @default("EMPLOYEE")
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  assignedAssets Asset[]
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  assets         Asset[]
+  history        AssetHistory[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Asset {
-  id             String       @id @default(cuid())
-  assetTag       String       @unique
-  name           String
-  category       String
-  status         String       @default("AVAILABLE")
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  assignedToId   String?
-  assignedTo     User?        @relation(fields: [assignedToId], references: [id])
+  id               String           @id @default(cuid())
+  name             String
+  assetTag         String           @unique
+  category         String
+  status           String           @default("AVAILABLE")
+  organizationId   String
+  organization     Organization     @relation(fields: [organizationId], references: [id])
+  assignedToId     String?
+  assignedTo       User?            @relation(fields: [assignedToId], references: [id])
+  history          AssetHistory[]
+  maintenanceLogs  MaintenanceLog[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model AssetHistory {
+  id        String   @id @default(cuid())
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id])
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model MaintenanceLog {
+  id        String   @id @default(cuid())
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id])
+  issue     String
+  status    String    @default("IN_PROGRESS")
+  createdAt DateTime @default(now())
 }

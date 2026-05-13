@@ -1,15 +1,38 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
-  }
+@theme {
+  /* Brand Primary (Deep Blue) */
+  --color-primary: hsl(226 71% 40%);
+  --color-primary-foreground: hsl(210 40% 98%);
+  
+  /* Surface and Neutral Grays */
+  --color-background: hsl(210 40% 98.5%);
+  --color-foreground: hsl(222.2 84% 4.9%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222.2 84% 4.9%);
+  --color-muted: hsl(210 40% 96.1%);
+  --color-muted-foreground: hsl(215.4 16.3% 46.9%);
+  --color-border: hsl(214.3 31.8% 91.4%);
+  
+  /* Status Colors */
+  --color-success: hsl(142 70% 45%);
+  --color-warning: hsl(38 92% 50%);
+  --color-destructive: hsl(0 84% 60%);
+
+  --radius-lg: 0.75rem;
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
 }
 
 @layer base {
+  * {
+    border-color: var(--color-border);
+  }
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    /* Essential for the "smooth" Google feel */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
