@@ -1,40 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand Primary: Koocaa Deep Blue */
-  --color-primary: #1e40af;
-  --color-primary-foreground: #f8fafc;
-  
-  /* Background: Soft Google Slate */
-  --color-background: #f8fafc;
-  --color-foreground: #0f172a;
-  
-  /* Card/Surface Colors */
+  --color-primary: #1e40af; /* Deep Blue */
+  --color-background: #f8fafc; /* Soft Slate */
   --color-card: #ffffff;
-  --color-card-foreground: #0f172a;
-  
-  /* Borders and Grays */
   --color-border: #e2e8f0;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  
-  /* Status Colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-destructive: #ef4444;
-
-  --radius-lg: 0.75rem;
-  --radius-md: 0.5rem;
-  --radius-sm: 0.25rem;
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    -webkit-font-smoothing: antialiased;
+    @apply bg-background text-slate-900 antialiased;
   }
 }
