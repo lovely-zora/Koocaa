@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, Users, Package2, Search } from "lucide-react";
+import { LayoutDashboard, Package, Users, Package2, Search, Headset } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -9,7 +9,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
-      {/* 1. PERMANENT SIDEBAR */}
       <aside className="hidden border-r bg-white md:block shadow-sm">
         <div className="flex h-full flex-col gap-2">
           <div className="flex h-14 items-center border-b px-6">
@@ -27,12 +26,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Link href="/users" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">
               <Users className="h-4 w-4" /> Employees
             </Link>
+            <Link href="/helpdesk" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">
+              <Headset className="h-4 w-4" /> Service Desk
+            </Link>
           </nav>
         </div>
       </aside>
 
       <div className="flex flex-col bg-slate-50">
-        {/* 2. TOP HEADER */}
         <header className="flex h-14 items-center gap-4 border-b bg-white px-6 shadow-sm">
           <div className="w-full flex-1">
             <div className="relative max-w-md">
@@ -44,8 +45,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {session.user?.name?.charAt(0) || "U"}
           </div>
         </header>
-
-        {/* 3. DYNAMIC CONTENT AREA */}
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-6xl mx-auto">
             {children}

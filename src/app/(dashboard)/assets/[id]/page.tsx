@@ -1,113 +1,92 @@
-import { getAssetDetails } from "@/server/actions/get-asset-details";
-import { AssetHistoryTimeline } from "@/components/shared/asset-history-timeline";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Laptop, User, Calendar, ShieldCheck, ArrowLeft, Hash } from "lucide-react";
-import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AssetHistoryTimeline } from "@/components/shared/asset-history-timeline";
+import { AssetAttachments } from "@/components/shared/asset-attachments"; // <-- Import added
+import { ArrowLeft, Laptop } from "lucide-react";
 
-export default async function AssetDetailPage({ params }: { params: { id: string } }) {
-  const asset = await getAssetDetails(params.id);
+export const dynamic = "force-dynamic";
 
-  if (!asset) notFound();
+export default async function AssetDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if (!session?.user?.orgId) return null;
+
+  // Next.js 15 requires awaiting dynamic params
+  const { id } = await params;
+
+  const asset = await prisma.asset.findUnique({
+    where: { id: id, organizationId: session.user.orgId },
+    include: { 
+      assignedTo: { select: { name: true, email: true } },
+      attachments: { orderBy: { uploadedAt: "desc" } } // <-- Attachments fetched
+    }
+  });
+
+  if (!asset) return notFound();
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <Link href="/assets" className="flex items-center text-sm text-gray-500 hover:text-blue-600 transition-colors w-fit">
-        <ArrowLeft className="w-4 h-4 mr-1" /> Back to Inventory
-      </Link>
-
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-4xl animate-in fade-in duration-500">
+      <div className="flex items-center gap-4">
+        <Link href="/assets" className="p-2 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">{asset.name}</h1>
-            <Badge className="bg-blue-50 text-blue-700 border-blue-100 uppercase text-[10px] tracking-widest px-2 py-0.5 font-bold">
-              {asset.status}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2 text-gray-500 mt-1">
-            <Hash className="w-3.5 h-3.5" />
-            <span className="font-mono text-sm uppercase tracking-tighter">{asset.assetTag}</span>
-          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            {asset.name}
+          </h1>
+          <p className="text-sm text-slate-500 mt-1 font-mono">{asset.assetTag}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="border-none shadow-sm overflow-hidden">
-            <CardHeader className="border-b bg-gray-50/50 py-4 px-6">
-              <CardTitle className="text-md font-semibold flex items-center gap-2 text-gray-700">
-                <Laptop className="w-4 h-4" /> Technical Specifications
+      <div className="grid md:grid-cols-[1fr_400px] gap-6">
+        {/* Left Column: Asset Info & Vault */}
+        <div className="space-y-6">
+          <Card className="bg-white shadow-sm border-slate-200">
+            <CardHeader className="border-b bg-slate-50/50 pb-4">
+              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Laptop className="w-4 h-4 text-blue-600" /> Hardware Details
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-4 pt-8 px-6 pb-8">
+            <CardContent className="p-6 grid grid-cols-2 gap-y-6 gap-x-4">
               <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Manufacturer</p>
-                <p className="text-sm font-medium text-gray-900">{asset.brand || "Not Specified"}</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Status</p>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700">
+                  {asset.status}
+                </span>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Model Name</p>
-                <p className="text-sm font-medium text-gray-900">{asset.model || "Generic"}</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Asset Category</p>
-                <p className="text-sm font-medium text-gray-900 capitalize">{asset.category.toLowerCase()}</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Category</p>
+                <p className="text-sm font-medium text-slate-900">{asset.category}</p>
               </div>
               <div className="col-span-2">
-                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Serial Identifier</p>
-                <p className="text-sm font-mono text-gray-700">{asset.serialNumber || "N/A"}</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Current Owner</p>
+                {asset.assignedTo ? (
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                      {asset.assignedTo.name?.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{asset.assignedTo.name}</p>
+                      <p className="text-xs text-slate-500">{asset.assignedTo.email}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">Unassigned</p>
+                )}
               </div>
             </CardContent>
           </Card>
 
-          <div className="pt-4">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" /> Ownership Timeline
-            </h2>
-            <AssetHistoryTimeline history={asset.history} />
-          </div>
+          {/* DOCUMENT VAULT UI COMPONENT INJECTED HERE */}
+          <AssetAttachments assetId={asset.id} attachments={asset.attachments} />
         </div>
 
-        <div className="space-y-6">
-          <Card className="border-none shadow-sm bg-blue-600 text-white">
-            <CardHeader className="pb-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-200">Currently Assigned To</p>
-            </CardHeader>
-            <CardContent>
-              {asset.assignedTo ? (
-                <div className="flex items-center gap-4 py-2">
-                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
-                    {asset.assignedTo.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-lg leading-tight">{asset.assignedTo.name}</p>
-                    <p className="text-xs text-blue-100">{asset.assignedTo.email}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-2">
-                   <p className="text-sm text-blue-100 italic">Available for deployment</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Financial Meta</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" /> Acquisition Date
-                </span>
-                <span className="font-semibold text-gray-900">
-                  {asset.purchaseDate ? new Date(asset.purchaseDate).toLocaleDateString() : "—"}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Right Column: Timeline */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 pl-1">Audit Trail</h3>
+          <AssetHistoryTimeline assetId={asset.id} />
         </div>
       </div>
     </div>

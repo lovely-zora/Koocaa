@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
@@ -18,39 +18,41 @@ model Organization {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  email          String         @unique
+  id             String          @id @default(cuid())
+  email          String          @unique
   password       String?
   name           String?
-  role           String         @default("EMPLOYEE")
+  role           String          @default("EMPLOYEE")
   organizationId String
-  organization   Organization   @relation(fields: [organizationId], references: [id])
+  organization   Organization    @relation(fields: [organizationId], references: [id])
   assets         Asset[]
   history        AssetHistory[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  ticketComments TicketComment[] // <-- New
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Asset {
-  id               String           @id @default(cuid())
-  name             String
-  assetTag         String           @unique
-  category         String
-  status           String           @default("AVAILABLE")
-  organizationId   String
-  organization     Organization     @relation(fields: [organizationId], references: [id])
-  assignedToId     String?
-  assignedTo       User?            @relation(fields: [assignedToId], references: [id])
-  history          AssetHistory[]
-  maintenanceLogs  MaintenanceLog[]
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id              String           @id @default(cuid())
+  name            String
+  assetTag        String           @unique
+  category        String
+  status          String           @default("AVAILABLE")
+  organizationId  String
+  organization    Organization     @relation(fields: [organizationId], references: [id])
+  assignedToId    String?
+  assignedTo      User?            @relation(fields: [assignedToId], references: [id])
+  history         AssetHistory[]
+  maintenanceLogs MaintenanceLog[]
+  attachments     Attachment[]     
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 model AssetHistory {
   id        String   @id @default(cuid())
   assetId   String
-  asset     Asset    @relation(fields: [assetId], references: [id])
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id])
   action    String
@@ -58,11 +60,36 @@ model AssetHistory {
   createdAt DateTime @default(now())
 }
 
+model Attachment {
+  id         String   @id @default(cuid())
+  assetId    String
+  asset      Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  fileName   String
+  fileUrl    String
+  fileType   String
+  uploadedAt DateTime @default(now())
+}
+
+// --- UPDATED HELPDESK MODELS ---
+
 model MaintenanceLog {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   assetId   String
-  asset     Asset    @relation(fields: [assetId], references: [id])
+  asset     Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
   issue     String
-  status    String   @default("IN_PROGRESS")
-  createdAt DateTime @default(now())
+  status    String          @default("OPEN")
+  priority  String          @default("MEDIUM") // <-- Make sure this line exists!
+  comments  TicketComment[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+}
+
+model TicketComment {
+  id               String         @id @default(cuid())
+  maintenanceLogId String
+  maintenanceLog   MaintenanceLog @relation(fields: [maintenanceLogId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message          String
+  createdAt        DateTime       @default(now())
 }

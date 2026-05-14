@@ -11,20 +11,19 @@ export async function returnAsset(assetId: string) {
   await prisma.$transaction([
     prisma.asset.update({
       where: { id: assetId, organizationId: session.user.orgId },
-      data: {
-        assignedToId: null,
-        status: "AVAILABLE",
-      },
+      data: { assignedToId: null, status: "AVAILABLE" },
     }),
     prisma.assetHistory.create({
       data: {
-        assetId: assetId,
+        assetId,
+        userId: session.user.id,
         action: "RETURNED",
-        notes: `Asset returned to inventory by ${session.user.name}`,
+        notes: `Asset returned to inventory by ${session.user.name || "Admin"}`,
       },
     }),
   ]);
 
   revalidatePath("/assets");
   revalidatePath(`/assets/${assetId}`);
+  revalidatePath("/dashboard");
 }

@@ -4,35 +4,29 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function reportMaintenance(assetId: string, issue: string, description?: string) {
+export async function reportIssue(assetId: string, issue: string, priority: string = "MEDIUM") {
   const session = await auth();
   if (!session?.user?.orgId) throw new Error("Unauthorized");
 
   await prisma.$transaction([
-    // 1. Update Asset status
     prisma.asset.update({
       where: { id: assetId, organizationId: session.user.orgId },
-      data: { status: "IN_REPAIR" }
+      data: { status: "IN_REPAIR" },
     }),
-    // 2. Create Maintenance Log
     prisma.maintenanceLog.create({
-      data: {
-        assetId: assetId,
-        issue: issue,
-        description: description,
-        status: "IN_PROGRESS"
-      }
+      data: { assetId, issue, status: "OPEN", priority },
     }),
-    // 3. Log to History
     prisma.assetHistory.create({
       data: {
-        assetId: assetId,
-        action: "MAINTENANCE_STARTED",
-        notes: `Issue: ${issue}. Reported by ${session.user.name}`
-      }
-    })
+        assetId,
+        userId: session.user.id,
+        action: "MAINTENANCE",
+        notes: `Ticket opened: ${issue} (Priority: ${priority})`,
+      },
+    }),
   ]);
 
+  revalidatePath("/assets");
   revalidatePath(`/assets/${assetId}`);
-  revalidatePath("/dashboard");
+  revalidatePath("/helpdesk");
 }

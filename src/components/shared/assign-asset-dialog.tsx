@@ -23,7 +23,7 @@ import { User, Loader2 } from "lucide-react";
 
 interface Employee {
   id: string;
-  name: string;
+  name: string | null;
 }
 
 export function AssignAssetDialog({ 
@@ -66,27 +66,27 @@ export function AssignAssetDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white border-slate-200">
         <DialogHeader>
-          <DialogTitle className="text-[#1E40AF]">Assign Asset</DialogTitle>
-          <DialogDescription>
-            Choose a team member to take responsibility for <strong>{assetName}</strong>.
+          <DialogTitle className="text-slate-900 text-xl font-bold">Assign Asset</DialogTitle>
+          <DialogDescription className="text-slate-500">
+            Choose a team member to take responsibility for <strong className="text-slate-800">{assetName}</strong>.
           </DialogDescription>
         </DialogHeader>
         
         <div className="py-6 space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Select Employee</label>
+            <label className="text-sm font-medium text-slate-700">Select Employee</label>
             <Select onValueChange={setSelectedEmployee} disabled={fetching || loading}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full border-slate-200">
                 <SelectValue placeholder={fetching ? "Loading employees..." : "Search by name..."} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border-slate-200">
                 {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>
+                  <SelectItem key={emp.id} value={emp.id} className="cursor-pointer hover:bg-slate-50">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <span>{emp.name}</span>
+                      <User className="w-4 h-4 text-slate-400" />
+                      <span className="text-slate-700 font-medium">{emp.name || "Unnamed User"}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -96,11 +96,11 @@ export function AssignAssetDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading} className="border-slate-200 text-slate-700 hover:bg-slate-50">
             Cancel
           </Button>
           <Button 
-            className="bg-[#1E40AF] hover:bg-[#1e3a8a]" 
+            className="bg-blue-700 hover:bg-blue-800 text-white" 
             onClick={handleAssign} 
             disabled={!selectedEmployee || loading}
           >

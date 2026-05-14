@@ -5,24 +5,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function getEmployees() {
   const session = await auth();
-  if (!session?.user?.orgId) throw new Error("Unauthorized");
+  if (!session?.user?.orgId) return [];
 
   return await prisma.user.findMany({
-    where: {
-      organizationId: session.user.orgId,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      createdAt: true,
-      _count: {
-        select: { assets: true } // Shows how many assets each person has
-      }
-    },
-    orderBy: {
-      name: 'asc',
-    },
+    where: { organizationId: session.user.orgId },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" }
   });
 }

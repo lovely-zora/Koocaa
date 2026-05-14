@@ -8,9 +8,9 @@ export async function assignAsset(assetId: string, employeeId: string) {
   const session = await auth();
   if (!session?.user?.orgId) throw new Error("Unauthorized");
 
-  // We use a "Transaction" to ensure both the assignment and history happen together
+  // We use a Prisma Transaction to ensure both updates happen together securely
   await prisma.$transaction([
-    // 1. Update the Asset
+    // 1. Update the Asset status and owner
     prisma.asset.update({
       where: { id: assetId, organizationId: session.user.orgId },
       data: {
@@ -24,10 +24,13 @@ export async function assignAsset(assetId: string, employeeId: string) {
         assetId: assetId,
         userId: employeeId,
         action: "ASSIGNED",
-        notes: `Assigned by ${session.user.name}`,
+        notes: `Assigned by ${session.user?.name || "Admin"}`,
       },
     }),
   ]);
 
+  // Refresh all relevant pages
   revalidatePath("/assets");
+  revalidatePath("/users");
+  revalidatePath("/dashboard");
 }
