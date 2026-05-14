@@ -1,0 +1,11 @@
+# Ensure you are in the project folder
+cd /media/hinata/Mine/Projects/koocaa
+
+# Stage the corrupted Helpdesk file and the updated Prisma schema
+git add .
+
+# Create the commit message
+git commit -m "Fixing Helpdesk Syntax Error and Prisma Priority Sync"
+
+# Push the code to GitHub
+git push origin main
