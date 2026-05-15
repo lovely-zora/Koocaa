@@ -1,11 +1,12 @@
+// prisma/schema.prisma
+
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // REMOVE THE URL LINE FROM HERE
 }
 
 model Organization {
@@ -43,8 +44,8 @@ model Asset {
   organization    Organization     @relation(fields: [organizationId], references: [id])
   assignedToId    String?
   assignedTo      User?            @relation(fields: [assignedToId], references: [id])
-  assignedAt      DateTime?
-  warrantyExpiry  DateTime?
+  assignedAt      DateTime?        // Added for lifecycle tracking
+  warrantyExpiry  DateTime?        // Added for lifecycle tracking
   history         AssetHistory[]
   maintenanceLogs MaintenanceLog[]
   attachments     Attachment[]
