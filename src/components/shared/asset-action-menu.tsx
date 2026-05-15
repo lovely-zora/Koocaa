@@ -9,9 +9,9 @@ import { UserPlus, Eye, RotateCcw, Wrench, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export function AssetActionMenu({ 
-  assetId, assetName, status 
+  assetId, assetName, status, userRole // Added userRole
 }: { 
-  assetId: string; assetName: string; status: string; 
+  assetId: string; assetName: string; status: string; userRole: string; 
 }) {
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isIssueOpen, setIsIssueOpen] = useState(false);
@@ -23,9 +23,12 @@ export function AssetActionMenu({
     setIsReturning(false);
   };
 
+  // Only show Assign if user is an ADMIN or SUPER_ADMIN
+  const canAssign = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
+
   return (
     <div className="flex items-center justify-end gap-2">
-      {status === "AVAILABLE" && (
+      {status === "AVAILABLE" && canAssign && ( // Added canAssign check
         <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="text-blue-700 border-blue-200 hover:bg-blue-50 h-8 px-3">
           <UserPlus className="w-3.5 h-3.5 mr-1.5" /> Assign
         </Button>
@@ -39,7 +42,7 @@ export function AssetActionMenu({
 
       {status !== "IN_REPAIR" && (
         <Button variant="outline" size="sm" onClick={() => setIsIssueOpen(true)} className="text-amber-700 border-amber-200 hover:bg-amber-50 h-8 px-3">
-          <Wrench className="w-3.5 h-3.5 mr-1.5" /> Report
+          <Wrench className="w-3.5 h-3.5 mr-1.5" /> Reports {/* Changed from "Report" */}
         </Button>
       )}
 

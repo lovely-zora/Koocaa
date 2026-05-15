@@ -12,3 +12,44 @@ git commit -m "Fixing Helpdesk Syntax Error and Prisma Priority Sync"
 
 # Push the code to GitHub
 git push origin main
+
+
+
+
+
+
+
+
+
+
+
+To get back to work on Koocaa after restarting your PC, follow these steps to start your development environment and the database.
+1. Start Your PostgreSQL Database
+
+Since the project relies on a local PostgreSQL database, ensure your database service is running first. On your Linux system, you can start it with:
+Bash
+
+sudo service postgresql start
+
+2. Launch the Project
+
+Navigate to your project folder and start the Next.js development server:
+Bash
+
+# Move to your project directory
+cd /media/hinata/Mine/Projects/koocaa
+
+# Start the development server
+npm run dev
+
+3. Verify Database Sync (Optional)
+
+If you want to ensure your database and Prisma types are still perfectly synchronized after the restart, you can run:
+Bash
+
+npx prisma generate
+
+4. Open the App
+
+Once the terminal says "Ready in...", open your browser and go to:
+http://localhost:3000

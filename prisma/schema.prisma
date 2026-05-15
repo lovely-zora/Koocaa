@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Organization {
@@ -27,7 +28,7 @@ model User {
   organization   Organization    @relation(fields: [organizationId], references: [id])
   assets         Asset[]
   history        AssetHistory[]
-  ticketComments TicketComment[] // <-- New
+  ticketComments TicketComment[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -42,9 +43,11 @@ model Asset {
   organization    Organization     @relation(fields: [organizationId], references: [id])
   assignedToId    String?
   assignedTo      User?            @relation(fields: [assignedToId], references: [id])
+  assignedAt      DateTime?
+  warrantyExpiry  DateTime?
   history         AssetHistory[]
   maintenanceLogs MaintenanceLog[]
-  attachments     Attachment[]     
+  attachments     Attachment[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -70,15 +73,13 @@ model Attachment {
   uploadedAt DateTime @default(now())
 }
 
-// --- UPDATED HELPDESK MODELS ---
-
 model MaintenanceLog {
   id        String          @id @default(cuid())
   assetId   String
   asset     Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
   issue     String
   status    String          @default("OPEN")
-  priority  String          @default("MEDIUM") // <-- Make sure this line exists!
+  priority  String          @default("MEDIUM")
   comments  TicketComment[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
