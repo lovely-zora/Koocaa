@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getEmployees } from "@/server/actions/employees";
-import { assignAsset } from "@/server/actions/assign-asset";
+// FIX: Import from the correct dedicated file
+import { assignAsset } from "@/server/actions/assign-asset"; 
 import { User, Loader2 } from "lucide-react";
 
 interface Employee {
@@ -26,6 +27,7 @@ interface Employee {
   name: string | null;
 }
 
+// FIX: Inline the props explicitly so the Action Menu knows they exist
 export function AssignAssetDialog({ 
   assetId, 
   assetName,

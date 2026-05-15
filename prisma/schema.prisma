@@ -6,13 +6,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // REMOVE THE URL LINE FROM HERE
+  // URL is managed by prisma.config.ts (Prisma 6+ driver-adapter pattern)
 }
 
 model Organization {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
+  address   String?  // ✅ FIX: was missing — used by organization.ts and settings/page.tsx
   currency  String   @default("USD")
   users     User[]
   assets    Asset[]
@@ -40,12 +41,16 @@ model Asset {
   assetTag        String           @unique
   category        String
   status          String           @default("AVAILABLE")
+  brand           String?          // ✅ FIX: was missing — used by import-assets.ts and search.ts
+  model           String?          // ✅ FIX: was missing — used by import-assets.ts
+  serialNumber    String?          // ✅ FIX: was missing — used by import-assets.ts
+  purchasePrice   Float?           // ✅ FIX: was missing — used by import-assets.ts
   organizationId  String
   organization    Organization     @relation(fields: [organizationId], references: [id])
   assignedToId    String?
   assignedTo      User?            @relation(fields: [assignedToId], references: [id])
-  assignedAt      DateTime?        // Added for lifecycle tracking
-  warrantyExpiry  DateTime?        // Added for lifecycle tracking
+  assignedAt      DateTime?
+  warrantyExpiry  DateTime?
   history         AssetHistory[]
   maintenanceLogs MaintenanceLog[]
   attachments     Attachment[]

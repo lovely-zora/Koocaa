@@ -13,13 +13,20 @@ import {
 } from "@/components/ui/command";
 import { useRouter } from "next/navigation";
 
+// FIX: We tell TypeScript that the name can indeed be a string OR null
+type SearchResult = {
+  assets: { id: string; name: string; assetTag: string }[];
+  employees: { id: string; name: string | null; email: string }[];
+};
+
 export function GlobalSearch() {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
-  const [results, setResults] = React.useState({ assets: [], employees: [] });
+  
+  // Apply the corrected type here
+  const [results, setResults] = React.useState<SearchResult>({ assets: [], employees: [] });
   const router = useRouter();
 
-  // Keyboard shortcut Ctrl+K or Cmd+K to open search instantly
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -31,18 +38,18 @@ export function GlobalSearch() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Fetch fuzzy search results from the server as the user types
   React.useEffect(() => {
     const fetchResults = async () => {
       if (query.length > 1) {
         const data = await globalSearch(query);
-        setResults(data);
+        // Safely cast the incoming data to our flexible type
+        setResults(data as SearchResult);
       } else {
         setResults({ assets: [], employees: [] });
       }
     };
 
-    const timer = setTimeout(fetchResults, 200); // Debounce to save server resources
+    const timer = setTimeout(fetchResults, 200);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -53,7 +60,6 @@ export function GlobalSearch() {
 
   return (
     <>
-      {/* Visual Search Trigger (The bar seen in the header) */}
       <button
         onClick={() => setOpen(true)}
         className="flex items-center w-full max-w-sm px-4 py-2 text-sm text-gray-400 bg-gray-50 border border-gray-200 rounded-full hover:bg-gray-100 transition-all group"
@@ -65,7 +71,6 @@ export function GlobalSearch() {
         </kbd>
       </button>
 
-      {/* The Command Palette Modal */}
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput 
           placeholder="Type an asset tag, name, or brand..." 
@@ -76,7 +81,7 @@ export function GlobalSearch() {
           
           {results.assets.length > 0 && (
             <CommandGroup heading="Assets">
-              {results.assets.map((asset: any) => (
+              {results.assets.map((asset) => (
                 <CommandItem 
                   key={asset.id} 
                   onSelect={() => onSelect(`/assets/${asset.id}`)}
@@ -94,7 +99,7 @@ export function GlobalSearch() {
 
           {results.employees.length > 0 && (
             <CommandGroup heading="Employees">
-              {results.employees.map((emp: any) => (
+              {results.employees.map((emp) => (
                 <CommandItem 
                   key={emp.id} 
                   onSelect={() => onSelect(`/employees/${emp.id}`)}
@@ -102,7 +107,7 @@ export function GlobalSearch() {
                 >
                   <User className="mr-2 h-4 w-4 text-purple-500" />
                   <div className="flex flex-col">
-                    <span className="font-medium text-gray-900">{emp.name}</span>
+                    <span className="font-medium text-gray-900">{emp.name || "Unnamed User"}</span>
                     <span className="text-[10px] text-gray-400">{emp.email}</span>
                   </div>
                 </CommandItem>

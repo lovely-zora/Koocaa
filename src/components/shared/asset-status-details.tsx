@@ -3,12 +3,11 @@
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
-  DropdownMenuItem, 
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Calendar, ShieldCheck, ShieldAlert, Clock } from "lucide-react";
+import { ShieldCheck, ShieldAlert, Clock } from "lucide-react";
 
 export function AssetStatusDetails({ 
   status, assignedAt, warrantyExpiry 
@@ -22,7 +21,7 @@ export function AssetStatusDetails({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all hover:ring-2 hover:ring-offset-1 ${
+        <button className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all hover:ring-2 hover:ring-offset-1 focus:outline-none ${
           status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-700 hover:ring-emerald-200' :
           status === 'ASSIGNED' ? 'bg-blue-100 text-blue-700 hover:ring-blue-200' :
           'bg-amber-100 text-amber-700 hover:ring-amber-200'
@@ -35,7 +34,6 @@ export function AssetStatusDetails({
         <DropdownMenuSeparator />
         
         <div className="p-2 space-y-3">
-          {/* Assignment Date */}
           <div className="flex items-center gap-3">
             <div className="p-1.5 bg-slate-100 rounded text-slate-500"><Clock className="w-3.5 h-3.5" /></div>
             <div>
@@ -44,7 +42,6 @@ export function AssetStatusDetails({
             </div>
           </div>
 
-          {/* Warranty Status */}
           <div className="flex items-center gap-3">
             <div className={`p-1.5 rounded ${isWarrantyValid ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
               {isWarrantyValid ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
