@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -15,6 +14,7 @@ model Organization {
   users     User[]
   assets    Asset[]
   createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
 }
 
 model User {
@@ -27,8 +27,9 @@ model User {
   organization   Organization   @relation(fields: [organizationId], references: [id])
   assets         Asset[]
   history        AssetHistory[]
+  comments       TicketComment[]
   createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  updatedAt      DateTime?      @updatedAt
 }
 
 model Asset {
@@ -48,9 +49,9 @@ model Asset {
   networks        NetworkInterface[]
   storage         StorageDrive[]
   software        InstalledSoftware[]
-  teledeployTasks TeledeployTask[]    // <-- THE MISSING RELATION LINK
+  teledeployTasks TeledeployTask[]
   createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  updatedAt       DateTime?           @updatedAt
 }
 
 model AssetHistory {
@@ -65,13 +66,25 @@ model AssetHistory {
 }
 
 model MaintenanceLog {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   assetId   String
-  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  asset     Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
   issue     String
-  status    String   @default("IN_PROGRESS")
-  priority  String   @default("LOW")
-  createdAt DateTime @default(now())
+  status    String          @default("OPEN")
+  priority  String          @default("LOW")
+  comments  TicketComment[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime?       @updatedAt
+}
+
+model TicketComment {
+  id        String         @id @default(cuid())
+  ticketId  String
+  ticket    MaintenanceLog @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User           @relation(fields: [authorId], references: [id])
+  content   String
+  createdAt DateTime       @default(now())
 }
 
 model HardwareSpec {
@@ -130,7 +143,7 @@ model TeledeployPackage {
   payloadUrl  String?
   command     String
   createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  updatedAt   DateTime?        @updatedAt
   tasks       TeledeployTask[]
 }
 
@@ -143,5 +156,5 @@ model TeledeployTask {
   status    String            @default("PENDING")
   resultLog String?
   createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  updatedAt DateTime?         @updatedAt
 }

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Rocket, TerminalSquare, Laptop } from "lucide-react";
 import Link from "next/link";
 import { CreatePackageDialog } from "@/components/discovery/create-package-dialog";
+import { DeployPackageDialog } from "@/components/discovery/deploy-package-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,6 @@ export default async function TeledeployPage() {
         </div>
         
         <div className="flex items-center gap-2">
-          {/* INJECTED THE NEW INTERACTIVE MODAL COMPONENT */}
           <CreatePackageDialog />
         </div>
       </div>
@@ -52,7 +52,7 @@ export default async function TeledeployPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {packages.map((pkg) => (
-            <Card key={pkg.id} className="bg-white border-slate-200 shadow-sm hover:border-purple-300 transition-colors group cursor-pointer">
+            <Card key={pkg.id} className="bg-white border-slate-200 shadow-sm hover:border-purple-300 transition-colors group cursor-pointer flex flex-col">
               <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
@@ -71,11 +71,14 @@ export default async function TeledeployPage() {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="p-4">
+              <CardContent className="p-4 flex-1 flex flex-col justify-between">
                 <p className="text-sm text-slate-600 line-clamp-2">{pkg.description || "No description provided."}</p>
                 <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
                   <span className="text-xs text-slate-400">{new Date(pkg.createdAt).toLocaleDateString()}</span>
-                  <span className="text-xs font-semibold text-purple-600 group-hover:underline">Deploy &rarr;</span>
+                  
+                  {/* INJECTED THE DEPLOY MODAL HERE */}
+                  <DeployPackageDialog packageId={pkg.id} packageName={pkg.name} osTarget={pkg.osTarget} />
+                  
                 </div>
               </CardContent>
             </Card>
