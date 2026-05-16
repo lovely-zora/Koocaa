@@ -1,19 +1,16 @@
-// prisma/schema.prisma
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
-  // URL is managed by prisma.config.ts (Prisma 6+ driver-adapter pattern)
 }
 
 model Organization {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
-  address   String?  // ✅ FIX: was missing — used by organization.ts and settings/page.tsx
   currency  String   @default("USD")
   users     User[]
   assets    Asset[]
@@ -21,41 +18,39 @@ model Organization {
 }
 
 model User {
-  id             String          @id @default(cuid())
-  email          String          @unique
+  id             String         @id @default(cuid())
+  email          String         @unique
   password       String?
   name           String?
-  role           String          @default("EMPLOYEE")
+  role           String         @default("EMPLOYEE")
   organizationId String
-  organization   Organization    @relation(fields: [organizationId], references: [id])
+  organization   Organization   @relation(fields: [organizationId], references: [id])
   assets         Asset[]
   history        AssetHistory[]
-  ticketComments TicketComment[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Asset {
-  id              String           @id @default(cuid())
+  id              String              @id @default(cuid())
   name            String
-  assetTag        String           @unique
+  assetTag        String              @unique
   category        String
-  status          String           @default("AVAILABLE")
-  brand           String?          // ✅ FIX: was missing — used by import-assets.ts and search.ts
-  model           String?          // ✅ FIX: was missing — used by import-assets.ts
-  serialNumber    String?          // ✅ FIX: was missing — used by import-assets.ts
-  purchasePrice   Float?           // ✅ FIX: was missing — used by import-assets.ts
+  status          String              @default("AVAILABLE")
   organizationId  String
-  organization    Organization     @relation(fields: [organizationId], references: [id])
+  organization    Organization        @relation(fields: [organizationId], references: [id])
   assignedToId    String?
-  assignedTo      User?            @relation(fields: [assignedToId], references: [id])
-  assignedAt      DateTime?
-  warrantyExpiry  DateTime?
+  assignedTo      User?               @relation(fields: [assignedToId], references: [id])
   history         AssetHistory[]
   maintenanceLogs MaintenanceLog[]
   attachments     Attachment[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  hardware        HardwareSpec?
+  networks        NetworkInterface[]
+  storage         StorageDrive[]
+  software        InstalledSoftware[]
+  teledeployTasks TeledeployTask[]    // <-- THE MISSING RELATION LINK
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 }
 
 model AssetHistory {
@@ -69,6 +64,53 @@ model AssetHistory {
   createdAt DateTime @default(now())
 }
 
+model MaintenanceLog {
+  id        String   @id @default(cuid())
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  issue     String
+  status    String   @default("IN_PROGRESS")
+  priority  String   @default("LOW")
+  createdAt DateTime @default(now())
+}
+
+model HardwareSpec {
+  id         String   @id @default(cuid())
+  assetId    String   @unique
+  asset      Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  osName     String?
+  osVersion  String?
+  cpuModel   String?
+  ramTotalMB Int?
+  lastSyncAt DateTime @default(now())
+}
+
+model NetworkInterface {
+  id         String  @id @default(cuid())
+  assetId    String
+  asset      Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  macAddress String
+  ipAddress  String?
+}
+
+model StorageDrive {
+  id         String @id @default(cuid())
+  assetId    String
+  asset      Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  driveName  String
+  capacityGB Int
+  freeGB     Int
+}
+
+model InstalledSoftware {
+  id        String  @id @default(cuid())
+  assetId   String
+  asset     Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  name      String
+  publisher String?
+  version   String?
+}
+
 model Attachment {
   id         String   @id @default(cuid())
   assetId    String
@@ -79,24 +121,27 @@ model Attachment {
   uploadedAt DateTime @default(now())
 }
 
-model MaintenanceLog {
-  id        String          @id @default(cuid())
-  assetId   String
-  asset     Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  issue     String
-  status    String          @default("OPEN")
-  priority  String          @default("MEDIUM")
-  comments  TicketComment[]
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @default(now()) @updatedAt
+model TeledeployPackage {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  osTarget    String
+  scriptType  String
+  payloadUrl  String?
+  command     String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  tasks       TeledeployTask[]
 }
 
-model TicketComment {
-  id               String         @id @default(cuid())
-  maintenanceLogId String
-  maintenanceLog   MaintenanceLog @relation(fields: [maintenanceLogId], references: [id], onDelete: Cascade)
-  userId           String
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  message          String
-  createdAt        DateTime       @default(now())
+model TeledeployTask {
+  id        String            @id @default(cuid())
+  packageId String
+  package   TeledeployPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  assetId   String
+  asset     Asset             @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  status    String            @default("PENDING")
+  resultLog String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 }

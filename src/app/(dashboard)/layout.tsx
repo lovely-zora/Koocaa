@@ -1,13 +1,12 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, Users, Search, Headset, ShieldAlert, Package2 } from "lucide-react";
+import { LayoutDashboard, Package, Users, Search, Headset, ShieldAlert, Package2, Folder } from "lucide-react"; 
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) redirect("/login");
 
-  // STRICT ROLE GUARD: Only Admins and Technicians allowed here.
   const role = session.user?.role as string;
   const isAuthorized = role === "SUPER_ADMIN" || role === "ADMIN" || role === "TECHNICIAN" || role === "IT_SUPPORT";
   
@@ -17,7 +16,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-slate-50 relative pb-28">
-      {/* Top Header */}
       <header className="flex h-14 items-center gap-4 border-b border-slate-100 bg-white px-6 shadow-sm sticky top-0 z-40">
         <div className="flex items-center gap-2 font-bold text-blue-800 text-lg mr-4">
           <Package2 className="h-5 w-5" /> Koocaa
@@ -39,12 +37,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto">{children}</div>
       </main>
 
-      {/* NEW UIVERSE FLOATING DOCK */}
+      {/* UIVERSE FLOATING DOCK - EXACTLY 5 ICONS */}
       <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
         <div className="flex justify-around gap-4 items-center px-4 py-2 bg-black rounded-[20px] ring-1 ring-slate-700 shadow-2xl">
           
@@ -65,7 +62,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/users" className="relative group hover:cursor-pointer hover:bg-slate-800 p-2.5 rounded-full transition-all duration-500">
             <Users className="w-5 h-5 text-white" />
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 w-max px-2 py-1 text-xs text-white bg-black rounded-md opacity-0 scale-50 transition-all duration-500 group-hover:opacity-100 group-hover:scale-100">
-              Employees
+              Director
             </div>
           </Link>
 
@@ -73,6 +70,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Headset className="w-5 h-5 text-white" />
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 w-max px-2 py-1 text-xs text-white bg-black rounded-md opacity-0 scale-50 transition-all duration-500 group-hover:opacity-100 group-hover:scale-100">
               Service Desk
+            </div>
+          </Link>
+
+          {/* 5TH ICON FIX: Now says "Capitals" and properly navigates to the Discovery page */}
+          <Link href="/discovery" className="relative group hover:cursor-pointer hover:bg-slate-800 p-2.5 rounded-full transition-all duration-500">
+            <Folder className="w-5 h-5 text-white" />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 w-max px-2 py-1 text-xs text-white bg-black rounded-md opacity-0 scale-50 transition-all duration-500 group-hover:opacity-100 group-hover:scale-100">
+              Capitals
             </div>
           </Link>
 
