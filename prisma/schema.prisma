@@ -7,14 +7,15 @@ datasource db {
 }
 
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  currency  String   @default("USD")
-  users     User[]
-  assets    Asset[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime? @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  currency      String   @default("USD")
+  activeModules String[] @default(["DASHBOARD", "ASSETS"])
+  users         User[]
+  assets        Asset[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime? @updatedAt
 }
 
 model User {
@@ -38,6 +39,7 @@ model Asset {
   assetTag        String              @unique
   category        String
   status          String              @default("AVAILABLE")
+  isDiscovered    Boolean             @default(false)
   organizationId  String
   organization    Organization        @relation(fields: [organizationId], references: [id])
   assignedToId    String?
